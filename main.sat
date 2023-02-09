@@ -1,0 +1,192 @@
+package main;
+import std::lang::{string};
+import std::math;
+
+const myData := bin_include("test.bin");
+
+type myEnum: enum(uint8) {
+    CLOSED,
+    OPEN,
+    EH,
+}
+
+fn hVectorAdd(x: [<4>]int, y: [<4>]int): [<4>]int {
+    return x + y;
+}
+
+fn passArrayAsSlice(arr: []int): int {
+    mut sum: int = 0;
+    for x in 0 .. arr.len {
+        sum += arr[x];
+    }
+    return sum;
+}
+
+fn dAdd(x: int, y: int = 0, z: int = 2): int {
+    return x + y + z;
+}
+
+fn otherStuff() {
+    mut x := 0;
+    x += dAdd(12);
+    x += dAdd(11, 1);
+    x += dAdd(13, 2, 3);
+}
+
+fn passByReference(mut x: &int)
+{
+    x += 15;
+}
+
+priv fn addNum(n: int): int
+{
+    return n + n;
+}
+
+pub fn fnApply(input: int, fx: *fn(int) -> int): int
+{
+    return fx(input);
+}
+
+pub fn testLambda(): int
+{
+    lambda := fn(x: int): int {
+        return x * x;
+    };
+    printf("%d^2 = %d\n", 5, lambda(5));
+    printf("%d^2 = %d\n", 7, lambda(7));
+    printf("%d^2 = %d\n", 7, fn(x: int): int {
+        return x * x;
+    }(7));
+    return 0;
+}
+
+priv fn GetString(): string
+{
+    return (string){};
+}
+
+pub fn testPassPtr(str: cstring): uint64
+{
+    mut len := 0ul;
+    mut s := cast<[*byte]>(str);
+    while *s != 0b {
+        ++len;
+        ++s;
+    }
+    return len;
+}
+
+pub fn jitTest()
+{
+    printf("Hello.\n");
+}
+
+pub fn testCapture(): int32
+{
+    mut x := 32;
+    mut y := 16;
+    [mut &x, mut &y] {
+        x = 16;
+        [&, const &y] {
+            x += 1;
+            //y += 1; //Cannot modify y as it is considered const in this scope.
+        }
+        y += 1;
+        [mut x] {
+            x += 1;
+        }
+    }
+    return x;
+}
+
+pub fn testPassLambda()
+{
+    sq := fn(x: int): int {
+        return x * x;
+    };
+    sum := fn(x: int): int {
+        return x + x;
+    };
+    printf("  sq(%02d) = %02d\n", 5, fnApply(5,  sq));
+    printf(" sum(%02d) = %02d\n", 5, fnApply(5, sum));
+    printf("auto(%02d) = %02d\n", 5, fnApply(5,
+        fn(x: int): int {
+            if x > 0 {
+                return (x*2) - (x/2);
+            } else {
+                return x - (x/2);
+            }
+        }
+    ));
+}
+
+[[message("Hi! How are you doing? 🪐Ω»«°😃")]]
+pub fn main(argc: int, argv: *cstring): int
+{
+    mut myE := myEnum::OPEN;
+    if myE == myEnum::OPEN {
+        myE = myEnum::CLOSED;
+    }
+
+    array := []int { 11, 13, 15 };
+    array_sum := passArrayAsSlice(array);
+    printf("11 + 13 + 15 = %d\n", array_sum);
+
+    printf("Welcome to the 🪐Saturn Programming Language!🪐\n");
+    str: string = "Hello, 世界! 😃 ";
+    str2 := str + str;
+    printf("%s (len = %d, alloc = %s)\n", str.ptr, str.len, "true" if str.alloc else "false");
+    printf("%s (len = %d, alloc = %s)\n", str2.ptr, str2.len, "true" if str2.alloc else "false");
+    str3 := str.substr(1u, 4u);
+    printf("%s (len = %d, alloc = %s)\n", str3.ptr, str3.len, "true" if str3.alloc else "false");
+    str4 := GetString();
+
+    testLambda();
+    testPassLambda();
+
+    printf("pi = %lf\n", math::PI);
+    printf("sin(pi / 2) = %lf\n", math::sin(math::PI / 2.0));
+    printf("tan(pi / 4) = %lf\n", math::tan(math::PI / 4.0));
+    printf("e^pi = %lf\n", math::exp(math::PI));
+    printf("float64::max = %lf\n", float64::max);
+    printf("int32::max = %d\n", int32::max);
+    printf("%d! = %d\n", 4, factorial(4));
+    strSwitchTest := "switch_test(%d) = %d\n";
+    printf(strSwitchTest, 11, switch_test(11));
+    printf(strSwitchTest, 45, switch_test(45));
+    printf(strSwitchTest, 38, switch_test(38));
+    strElseIfTest := "elif_test(%d) = %d\n";
+    printf(strElseIfTest, 11, elif_test(11));
+    printf(strElseIfTest, 45, elif_test(45));
+    printf(strElseIfTest, 38, elif_test(38));
+
+    x := 13;
+    printf("x = %d\n", x);
+    passByReference(x);
+    printf("x = %d\n", x);
+
+    printf("test.bin: ");
+    for n in myData do
+        printf("%02X ", n);
+    printf("\n");
+
+    printf("Evens: ");
+    for i in 0...10:2 {
+        printf("%02d ", i);
+    }
+    printf("\n");
+
+    mut q := 0.123q;
+    q += 0.25q;
+    // q = math::sin(q);
+
+    mut i := 5;
+    ++i;
+    j := ++i;
+
+    return 0;
+}
+
+
+

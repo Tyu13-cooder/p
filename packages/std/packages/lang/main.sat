@@ -1,0 +1,146 @@
+package lang;
+/*
+ * The lang package for Saturn.
+ * Contains definitions for basic structs and functions for the Saturn programming language.
+ *
+ * Copyright Matthew Obi 2022
+ *
+ * Last modified 2022 April 15
+ */
+
+/*
+ * Common types
+ */
+
+pub type hash_t: uint64;
+
+pub type fp32:  float32;
+pub type fp64:  float64;
+pub type fp128: float128;
+
+pub type i8:  int8;
+pub type i16: int16;
+pub type i32: int32;
+pub type i64: int64;
+
+pub type u8:  byte;
+pub type u16: uint16;
+pub type u32: uint32;
+pub type u64: uint64;
+
+pub type u8ptr: *byte;
+
+/*
+ * Rotate shift functions
+ */
+
+pub fn rotl(x: uint8, n: uint8): uint8 {
+    return (x << n) | (x >> (-n & 7b));
+}
+
+pub fn rotr(x: uint8, n: uint8): uint8 {
+    return (x >> n) | (x << (-n & 7b));
+}
+
+pub fn rotl(x: uint16, n: uint16): uint16 {
+    return (x << n) | (x >> (-n & 15us));
+}
+
+pub fn rotr(x: uint16, n: uint16): uint16 {
+    return (x >> n) | (x << (-n & 15us));
+}
+
+pub fn rotl(x: uint32, n: uint32): uint32 {
+    return (x << n) | (x >> (-n & 31u));
+}
+
+pub fn rotr(x: uint32, n: uint32): uint32 {
+    return (x >> n) | (x << (-n & 31u));
+}
+
+pub fn rotl(x: uint64, n: uint64): uint64 {
+    return (x << n) | (x >> (-n & 63ul));
+}
+
+pub fn rotr(x: uint64, n: uint64): uint64 {
+    return (x >> n) | (x << (-n & 63ul));
+}
+
+/*
+ * String (utf8-encoded string)
+ */
+
+c_include "string.h";
+
+pub type string: struct {
+    ptr: cstring;
+    len: uint;
+    alloc: bool;
+}
+
+pub fn(*string) new(): void {
+    this.ptr = "";
+    this.len = 1u;
+    this.alloc = false;
+}
+
+pub fn(*string) delete(): void {
+    if this.alloc == true then destroy this.ptr;
+}
+
+pub fn(*string) operator=(str: cstring): void {
+    this.delete();
+    this.ptr = str;
+    this.len = strlen(str);
+    this.alloc = false;
+}
+
+pub fn(*string) operator=(str: &string): void {
+    if this.ptr != str.ptr then this.delete();
+    this.ptr = str.ptr;
+    this.len = cast<[uint]>(str.len);
+    this.alloc = str.alloc;
+}
+
+pub fn(*string) operator<=>(str: cstring): int {
+    return strcmp(this.ptr, str);
+}
+
+pub fn(*string) operator<=>(str: &string): int {
+    return strcmp(this.ptr, str.ptr);
+}
+
+pub fn(*string) operator+(str: *string): string {
+    new_ptr := make unsafe [this.len + str.len + 1u]byte;
+    strcpy(new_ptr, this.ptr);
+    strcat(new_ptr, str.ptr);
+    return (string) {
+        ptr: new_ptr,
+        len: cast<[uint]>(strlen(new_ptr)),
+        alloc: true
+    };
+}
+
+pub fn(*string) substr(start: uint, len: uint): string {
+    mut new_ptr := make unsafe [len+1u]byte;
+    src_ptr := cast<[*byte]>(this.ptr);
+    for i in 0u..len {
+        if i >= this.len then break;
+        new_ptr[i] = src_ptr[start + i];
+    }
+    return (string) {
+        ptr: new_ptr,
+        len: cast<[uint]>(strlen(new_ptr)),
+        alloc: true
+    };
+}
+
+pub fn(*string) length(): uint {
+    return this.len;
+}
+
+pub fn(*string) cstr(): cstring {
+    return this.ptr;
+}
+
+

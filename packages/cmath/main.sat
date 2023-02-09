@@ -1,0 +1,11 @@
+package cmath;
+/*
+ * The cmath package for Saturn.
+ * A wrapper for math.h.
+ *
+ * Copyright Matthew Obi 2021
+ *
+ * Last modified 2021 December 20
+ */
+
+c_include "math.h";

@@ -1,0 +1,11 @@
+package main;
+
+fn factorial(x: int): int { 
+    switch x {
+        case 0:
+        case 1:
+            return 1;
+        default:
+            return x * factorial(x - 1);
+    }
+}

@@ -1,0 +1,33 @@
+fn switch_test(x: int): int {
+    mut y := 0;
+    switch x {
+        case 11:
+            printf("Woo!\n");
+            y += 5;
+        case 45:
+            printf("Wee ");
+            y += 1;
+            fallthrough;
+        default:
+            printf("woo!\n");
+            y += 2;
+    }
+    return y;
+}
+
+fn elif_test(x: int): int {
+    mut y := 0;
+    if x == 11 {
+        printf("Woo!\n");
+        y += 5;
+    } else if x == 45 {
+        printf("Wee ");
+        y += 1;
+        printf("woo!\n");
+        y += 2;
+    } else {
+        printf("woo!\n");
+        y += 2;
+    }
+    return y;
+}
